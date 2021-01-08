@@ -1,0 +1,50 @@
+{
+    "emby_server": "http://localhost:8096",
+    "user_name": "emby_user",
+    "user_password": "emby_user_pwd",
+    "output_path": "backup",
+    "Oppo_IP": "192.168.1.141",
+    "timeout_oppo_conection": 10,
+    "timeout_oppo_playitem": 60,
+	"Autoscript": false,
+    "Always_ON": false,
+    "TV": "True",
+    "TV_IP": "192.168.1.146",
+    "TV_KEY": "",
+    "TV_DeviceName": "LG Smart TV (OLED65C9MLB)",
+    "Source": 0,
+    "DebugLevel": 1,
+    "AV": "True",
+    "AV_Ip": "192.168.1.136",
+    "AV_Input": "pc",
+    "AV_Always_ON": false,
+    "AV_CMD_POW_ON": "cmd",
+    "AV_CMD_CHANGE_HDMI": "cmd",
+    "AV_CMD_POW_OFF": "cmd",
+    "MonitoredDevice": "",
+    "servers": [
+        {
+            "name": "server1",
+            "Emby_Path": "/home/drive/",
+            "Oppo_Path": "/pi/drive"
+        },
+        {
+            "name": "server2",
+            "Emby_Path": "192.168.1.80",
+            "Oppo_Path": "SYNOLOGY"
+        }
+    ],
+    "Libraries": [
+        {
+            "Name": "TV en vivo",
+            "Id": "d991b9d28bdde88833e9cdd14174a5ad",
+            "Active": false
+        },
+        {
+            "Name": "Series TV",
+            "Id": "d1a619a6a967a808973ae77cb091d9fa",
+            "Active": true
+        }
+    ],
+	"resume_on":""
+}

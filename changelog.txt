@@ -1,0 +1,88 @@
+#version 0.1
+ Añadida opcion de configuracion de la IP del televisor LG
+ Fix problemas con las rutas de los ficheros de configuracion y log desde Emby
+ Cambio en el log para visualizar mejor los parametros del config utlizados.
+ Añadidos mensajes al log para las instrucciones de montado, play y timeout.
+#version 0.2
+ Añadida opcion de configuracion de concordancia de rutas emby/oppo (servers).
+ Fix para encode de simbolos especiales en las rutas y nombres de archivos a reproducir
+ Añadido al pack fichero playback.sh de pruebas
+#version 0.3
+ Añadida opcion de configuracion de timeout de conexion al oppo (timeout_oppo_conection).
+ Añadida opcion de configuracion de timeout de reproducion en el oppo (timeout_oppo_playitem).
+ Añadida opcion de configuracion del nombre de dispositivo LG (LG_DeviceName).
+ Añadida opcion de configuracion del nivel de Debug (DebugLevel).
+ Modificacion de los mensajes de log para facilitar su lectura.
+#version 0.4
+ Fix uso correcto de los parametros de usuario y pwd del oppo.
+#version 0.5
+ Fix error tipografico en parametro oppo_smb_pwd
+ Fix mostrar correctamente los parametros oppo_smb_user y oppo_smb_pwd
+ Permitir la reproduccion de carpetas BDMV
+#version 0.6
+ Fix en la reproduccion de carpetas BDMV
+#version 0.7
+ Cambio de nombre del script a emby_xnoppo_script.py
+ Unificacion de funciones para que script y cliente usen el mismo codigo.
+ Ahora el script requiere de la carpeta lib con todos sus elementos.
+ Generalizacion de los parametros de TV y AV en config.json (revisar el json).
+ Ahora cada usuario puede crear sus propios scripts para su modelo y marca de TV y AV.
+ Fix barra de progreso de la pelicula cuando se controla el dispositivo Xnoppo.
+#version 0.8
+ añadido nuevo parametro "MonitoredDevice" al config para monitorizar un dispositivo, se debe indicar el deviceid
+ fix en la reproduccion de series
+ añadido busqueda experimental de la libreria del items a ejecutar.
+#version 0.9
+ añadido script de configuracion emby_xnoppo_conf
+ añadida opción de configuracion de librerias permitidas (para el monitored device)
+ añadida sincronizacion botones "continuar desde" e "iniciar desde el principio"
+ añadido sistema de control de intentos de reproducciones simultaneas
+ mejora en el feedback del tiempo de reproduccion del chinoppo a Emby
+ fix barra de progreso de la pelicula cuando se controla el dispositivo Xnoppo si la pelicula se inició desde el monitored device.
+#version 1.0
+ fix error en el configurador al introducir un texto en vez de un numero en la seleccion de dispositivo
+ fix al llamar al test de AV
+ fix al intentar mandar un mensaje de OPPO no disponible tras timeout de conexion
+ cambio de metodo de deteccion de la libreria del item iniciado
+ ahora se puede cambiar la pista de audio y subtitulos desde el control remoto del movil (si se cambia en el oppo no se sincroniza el cambio)
+ añadido asistente de configuracion al configurador (se recomienda encender el oppo limpio antes y reiniciarlo tras la configuracion)
+ añadido mensaje con el tiempo de espera para la reproducción.
+#version 1.1
+ fix configurador opcion 4.Salir de la configuracion avanzada de librerias
+ fix configurador opcion 3.Activar todas las librerias de la configuracion avanzada de librerias
+ cambio en el sistema de montaje, ya no es necesario el usuario y pwd de smb, el xnoppo usa lo que tiene guardado.
+ eliminacion de los parametros user y pwd de smb del cliente y configurador.
+ añadidos mensajes de error al usuario para montaje y play, ahora si no se monta bien o no responde ok el play no se espera al timeout.
+#version 1.2
+ fix en el asistente de configuracion para incluir el monitored device
+ añadido parametro al config "Always_ON" para indicar que el OPPO estara siempre encendido o se encenderá manualmente antes
+ añadida a ejemplos un fichero de AV que permite elegir los comandos para encender, cambiar hdmi y apagar el AV. Los parametros se pueden configurar desde el configurador.
+ el fichero de log tiene ahora un tamaño limitado. Se crean ademas dos ficheros .1 y .2 que junto con el .log van rotando la informacion de log.
+ añadido comando de loginsmb al configurador en el test de montaje
+#version 1.3
+ fix reproduccion isos desde monitored device (tv)
+ fix error division por cero al detener un iso en un menu estatico
+ fix parametro de configuracion AV_Always_ON para que cliente y configurador usen el mismo tipo
+ cambio en el ejemplo de AV por comandos para que el cliente no espere respuesta de los mismos
+#version 1.3b
+ añadido el fichero para AV Onkyo
+ añadidas licencias MIT en los ficheros de LG y ONKYO y links a los github correspondientes.
+#version 1.4
+ fix servidor websocket para no ser localhost y utilizar la variable emby_server
+ añadido al configurador la copia automatica de ficheros cuando se selecciona la TV y AV
+ reboot automatico del configurador para recompilar las librerias de TV y AV recien copiadas.
+ migracion de scripts DENON y NAD a python en el formato xnoppo_avr para su uso directo por el cliente.
+#version 1.4b
+ fix configurador variables TV y AV_Always_ON
+ fix configurador restart para equipos pi
+#version 1.5
+ fix conexiones a emby ciertas contraseñas en determinados sistemas fallaban
+ fix configurador al no elegir ningun TV/AV de la lista al configurarlo ahora se considera que no se activa la integracion con TV/AV
+ añadido nuevo parametro al config Autoscript para indicar si se tiene o no instalado en el chinoppo
+ añadida desmontaje de unidad al terminar la reproduccion si se tiene autoscript, evitando asi los problemas de montaje de smb.
+ eliminacion del password de emby del archivo log.
+ ahora el TV LG vuelve a la ultima app/entrada seleccionada antes del cambio de hdmi al chinoppo ya se use movil o app emby de la LG.
+ eliminacion del configurador de la seleccion de dispositivo en la configuracion de la tv al no ser ya necesario.
+ modificados los comandos para AV DENON de encedido y apagado para que solo actue sobre la zona main.
+ ahora el cliente recarga el config despues de terminar una reproduccion.
+ 
