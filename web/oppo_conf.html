@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<title>Xnoppo Web Setup</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://kit.fontawesome.com/6e2f13563d.js" crossorigin="anonymous"></script>
+<body>
+
+<script>
+var userLang = navigator.language || navigator.userLanguage;
+var app = angular.module('myApp', []);
+app.controller('xnoppo_config', function($scope, $http) 
+{
+  $http.get("xnoppo_config").then(function(response) {
+    $scope.config = {};
+    $scope.config = response.data;
+	console.log(response.data);
+	$scope.hide_spin = true;
+	$scope.error = true;
+	$http({method : "GET",url : "lang"}).then(
+	function mySuccess(response2) {
+		$scope.lang = {};
+		$scope.lang = response2.data;
+		$scope.oppo_test_button = $scope.lang.oppo_test_button;
+		console.log(response2.data);
+		}, 
+	function myError(response) {
+		$scope.myWelcome = response.statusText;}
+		)
+	})
+    $scope.check_oppo = function () {
+			$scope.oppo_test_button = $scope.lang.oppo_test_button_test;
+			$scope.hide_spin = false;
+			$http.post("check_oppo", $scope.config).then(function mySuccess(response) {
+			$scope.response = response.data;
+			$scope.error = false;
+			$scope.oppo_test_button = $scope.lang.oppo_test_button_ok;
+			$scope.hide_spin =true;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+			$scope.error = true;
+			$scope.oppo_test_button = $scope.lang.oppo_test_button_err;
+			$scope.hide_spin =true;
+		  })};
+	$scope.save_config = function(){
+          $http.post("save_config", $scope.config)
+            .then(function(res){
+              console.log(res);
+            })};
+});
+</script>
+<script>
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+</script>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:1000px;">
+  <!-- The Grid -->
+      <!-- Left Column -->      
+		<div ng-app="myApp" ng-cloak ng-controller="xnoppo_config" class="w3-white">		
+        	<div class="w3-sidebar w3-bar-block w3-collapse w3-white w3-text-grey " style="width:250px;" id="mySidebar">
+			<button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">{{lang.menu_option_close}} &times;</button>
+				<div class="w3-display-container">
+				  <img src="https://www.avpasion.com/wp-content/uploads/2019/04/20190417_154630-2056x1542.jpeg" style="width:100%" alt="Xnoppo">
+				  <div class="w3-display-bottomleft w3-container w3-text-white">
+					<h2>Xnoppo</h2>
+				  </div>
+				</div>			
+        		<p class="w3-large"><b><i class="fa fa-cogs fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_config}}</b></p>
+                  <a href="emby_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"> <img src="android-chrome-36x36.png" width="10%" class="w3-margin-right">{{lang.menu_option_emby}}</a> 
+                  <a href="oppo_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding w3-teal w3-text-white"><img src="dragon.png" width="9%" class="w3-margin-right w3-text-red">{{lang.menu_option_oppo}}</a> 
+                  <a href="lib_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-folder fa-fw w3-margin-right"></i>{{lang.menu_option_lib}}</a>
+                  <a href="path_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-project-diagram fa-fw w3-margin-right"></i>{{lang.menu_option_paths}}</a>
+                  <a href="tv_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-tv fa-fw w3-margin-right"></i>{{lang.menu_option_tv}}</a>
+                  <a href="av_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><img src="av-receiver-icon-2.jpg" width="10%" class="w3-margin-right">{{lang.menu_option_av}}</a>
+                  <a href="other_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-sliders-h fa-fw w3-margin-right"></i>{{lang.menu_option_other}}</a>
+          		<p class="w3-large"><b><i class="fa fa-server fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_Service}}</b></p>
+            	  <a href="status.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-heartbeat fa-fw w3-margin-right w3-text-red"></i>{{lang.menu_option_status}}</a> 
+            	  <a href="help.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="far fa-question-circle fa-fw w3-margin-right"></i>{{lang.menu_option_test}}</a> 
+        	</div>
+		
+    <!-- End Left Column -->
+<div class="w3-main" style="margin-left:260px">
+<div class="w3-teal">
+  <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+	<!-- Right Column -->
+			<div class="w3-container w3-white">
+					<h2 class="w3-text-grey"><img src="dragon.png" width="5%" class="w3-margin-right w3-xxlarge w3-text-teal">{{lang.oppo_conf_title}}</h2>
+					  <h5 class="w3-opacity"><b>{{lang.oppo_conf_data}}</b></h5>
+						<form name="myForm">
+							<p><label>{{lang.oppo_conf_ip}}</label>
+							<input name="config.emby_server" class="w3-input w3-border w3-round" type="text" ng-model="config.Oppo_IP" required></p>
+							<p><label>{{lang.oppo_conf_timeout_conn}}</label>
+							<input class="w3-input w3-border w3-round" type="number" ng-model="config.timeout_oppo_conection"></p>
+							<p><label>{{lang.oppo_conf_timeout_play}}</label>
+							<input class="w3-input w3-border w3-round" type="number" ng-model="config.timeout_oppo_playitem"></p>
+							<p><label>{{lang.oppo_conf_timeout_mount}}</label>
+							<input class="w3-input w3-border w3-round" type="number" ng-model="config.timeout_oppo_mount"></p>
+							<p><input class="w3-check w3-border w3-round-large" type="checkbox" ng-model="config.BRDisc">
+							<label>{{lang.oppo_conf_BRDisc}}</label></p>
+							<p><input class="w3-check" type="checkbox" ng-model="config.Always_ON">
+							<label>{{lang.oppo_conf_always_on}}</label></p>
+							<p><input class="w3-check" type="checkbox" ng-model="config.Autoscript">
+							<label>{{lang.oppo_conf_autoscript}}</label></p>						
+							<p><input class="w3-check" type="checkbox" ng-model="config.default_nfs">
+							<label>{{lang.oppo_conf_default_nfs}}</label></p>						
+							<p><input class="w3-check" type="checkbox" ng-model="config.wait_nfs">
+							<label>{{lang.oppo_conf_wait_for_nfs}}</label></p>						
+							<p><input class="w3-check" type="checkbox" ng-model="config.smbtrick">
+							<label>{{lang.oppo_conf_smbtrick}}</label></p>						
+							<BR>
+							<div class="w3-bar w3-right-align">
+								<button ng-click="check_oppo()" class="w3-btn w3-teal"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin></i> {{oppo_test_button}}</button>
+								<button ng-click="save_config()" class="w3-btn  w3-teal" >{{lang.oppo_save_button}}</button>
+							</div>
+						<BR>
+						<BR>
+						<BR>
+						<BR>
+						<BR>
+						<BR>
+						
+						        <a href="lib_conf.html" onclick="w3_close()" class="w3-button w3-right w3-teal">{{lang.oppo_conf_next}}</a>
+								<BR>
+						</form>
+						<BR>
+						
+						<footer class="w3-container w3-teal w3-center w3-margin-top">
+							<p>Xnoppo</p>
+							<p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+						</footer> 			
+			</div>
+							</div> 			   
+	</div>        				
+</div>
+
+	   
+	<!-- End Right Column -->	   
+  <!-- End Grid -->
+ </div>
+   
+</div> 
+</div>
+<BR>
+  <!-- End Page Container -->
+</div>
+</body>
+</html>

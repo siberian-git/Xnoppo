@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<title>Xnoppo Web Setup</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://kit.fontawesome.com/6e2f13563d.js" crossorigin="anonymous"></script>
+<body>
+
+<script>
+var userLang = navigator.language || navigator.userLanguage;
+var app = angular.module('myApp', []);
+app.controller('xnoppo_config', function($scope, $http) 
+{
+  $scope.ready=false;
+  $http.get("xnoppo_config").then(function(response) {
+    $scope.config = {};
+    $scope.config = response.data;
+	console.log(response.data);
+	$scope.hide_spin_on = true;
+	$scope.hide_spin_off = true;
+	$scope.hide_spin_source = true;
+	$scope.hide_spin_hdmi=true;
+	$scope.hideLG= true;
+	$scope.hideSCR= true;
+	$scope.selectedTV=$scope.config.AV_model;
+	for (av_input in $scope.config.AV_SOURCES)
+	{
+	  if ($scope.config.AV_SOURCES[av_input].Param == $scope.config.AV_Input) {
+	    $scope.SelSource=$scope.config.AV_SOURCES[av_input];
+	  }
+	}
+	$http({method : "GET",url : "lang"}).then(
+	function mySuccess(response2) {
+		$scope.lang = {};
+		$scope.lang = response2.data;
+		$scope.av_test_on_button = $scope.lang.av_test_on_button;
+		$scope.av_test_off_button = $scope.lang.av_test_off_button;
+		$scope.av_getsources_button =$scope.lang.av_getsources_button;
+		$scope.av_test_hdmi_button = $scope.lang.av_test_hdmi_button;
+		console.log(response2.data);
+		$scope.ready=true;
+		}, 
+	function myError(response) {
+		$scope.myWelcome = response.statusText;}
+		)
+	});
+	$scope.$watch('selectedTV',function() {$scope.SelTV($scope);});
+	$scope.$watch('SelSource',function() {$scope.SelSou($scope);});
+	$scope.SelTV = function($scope) {
+		if ($scope.ready) {
+			if ($scope.config.AV_model!=$scope.selectedTV){
+			$scope.config.AV_model=$scope.selectedTV;
+			console.log($scope.config.AV_model);
+			$http.post("save_config", $scope.config)
+            .then(function(res){
+              console.log(res);
+            });;
+			if ($scope.selectedTV!='SCRIPTS') {
+				$scope.av_getsources_button = $scope.lang.av_getsources_button_test;
+				$scope.hide_spin_source = false;
+				$scope.move_av();
+				setTimeout(() => {  $scope.get_av_sources(); }, 2000);
+			}
+			};
+		
+		};
+		$scope.hideLG= true;
+		$scope.hideSCR= true;
+		if ($scope.selectedTV!='SCRIPTS') {
+			$scope.hideLG= false;
+			};
+		if ($scope.selectedTV=='SCRIPTS') {
+			$scope.hideSCR= false;
+			};
+	};
+	$scope.SelSou = function($scope) {
+		if ($scope.ready) {
+			console.log($scope.SelSource);
+			if ($scope.SelSource){ 
+			for (av_input in $scope.config.AV_SOURCES)
+			{
+			  if ($scope.config.AV_SOURCES[av_input].Param == $scope.SelSource.Param) {
+				$scope.config.AV_Input=$scope.SelSource.Param;
+			  }
+			}
+			console.log($scope.config.AV_Input);
+			}
+		};
+	};
+	$scope.save_config = function(){
+          $http.post("save_config", $scope.config)
+            .then(function(res){
+              console.log(res);
+            })};
+	$scope.move_av = function(){
+          $http.post("move_av", $scope.config)
+            .then(function(res){
+              console.log(res);
+            })};
+	$scope.tv_test_conn = function () {
+			$scope.tv_test_button = $scope.lang.tv_test_button_test;
+			$scope.hide_spin = false;
+			$http.post("tv_test_conn", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.error = false;
+			$scope.tv_test_button = $scope.lang.tv_test_button_ok;
+			$scope.hide_spin =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.error = true;
+			$scope.tv_test_button = $scope.lang.tv_test_button_err;
+			$scope.hide_spin =true;
+		  })};
+	$scope.get_av_sources = function () {
+			$scope.ready=false;
+			$scope.av_getsources_button = $scope.lang.av_getsources_button_test;
+			$scope.hide_spin_source = false;
+			$http.post("get_av_sources", $scope.config).then(function mySuccess(responset) {
+			$http.get("xnoppo_config").then(function(response) {
+				$scope.config = {};
+				$scope.config = response.data;
+				$scope.selectedTV=$scope.config.AV_model;
+				for (av_input in $scope.config.AV_SOURCES)
+				{
+				  if ($scope.config.AV_SOURCES[av_input].Param == $scope.config.AV_Input) {
+					$scope.SelSource=$scope.config.AV_SOURCES[av_input];
+				  }
+				}
+				console.log(response.data);});
+			$scope.error = false;
+			$scope.av_getsources_button = $scope.lang.av_getsources_button_ok;
+			$scope.hide_spin_source =true;
+			$scope.ready=true;
+			}, function myError(responset) {
+			console.log(responset.data);
+			$scope.responset = responset.statusText;
+			$scope.error = true;
+			$scope.av_getsources_button = $scope.lang.av_getsources_button_err;
+			$scope.hide_spin_source =true;
+			$scope.ready=true;
+		  })};
+	$scope.av_test_on = function () {
+			$scope.av_test_on_button = $scope.lang.av_test_on_button_test;
+			$scope.hide_spin_on = false;
+			$http.post("av_test_on", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.av_test_on_button = $scope.lang.av_test_on_button_ok;
+			$scope.hide_spin_on =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.av_test_on_button = $scope.lang.av_test_on_button_err;
+			$scope.hide_spin_on =true;
+		  })};
+	$scope.av_test_off = function () {
+			$scope.av_test_off_button = $scope.lang.av_test_off_button_test;
+			$scope.hide_spin_off = false;
+			$http.post("av_test_off", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.av_test_off_button = $scope.lang.av_test_off_button_ok;
+			$scope.hide_spin_off =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.av_test_off_button = $scope.lang.av_test_off_button_err;
+			$scope.hide_spin_off =true;
+		  })};
+	$scope.av_test_hdmi = function () {
+			$scope.av_test_hdmi_button = $scope.lang.av_test_hdmi_button_test;
+			$scope.hide_spin_hdmi = false;
+			$http.post("av_test_hdmi", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.av_test_hdmi_button = $scope.lang.av_test_hdmi_button_ok;
+			$scope.hide_spin_hdmi =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.av_test_hdmi_button = $scope.lang.av_test_hdmi_button_err;
+			$scope.hide_spin_hdmi =true;
+		  })};
+
+});
+</script>
+<script>
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+</script>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:1000px;">
+  <!-- The Grid -->
+      <!-- Left Column -->      
+		<div ng-app="myApp" ng-cloak ng-controller="xnoppo_config" class="w3-white">		
+        	<div class="w3-sidebar w3-bar-block w3-collapse w3-white w3-text-grey " style="width:250px;" id="mySidebar">
+			<button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">{{menu_option_close}} &times;</button>
+				<div class="w3-display-container">
+				  <img src="https://www.avpasion.com/wp-content/uploads/2019/04/20190417_154630-2056x1542.jpeg" style="width:100%" alt="Xnoppo">
+				  <div class="w3-display-bottomleft w3-container w3-text-white">
+					<h2>Xnoppo</h2>
+				  </div>
+				</div>			
+        		<p class="w3-large"><b><i class="fa fa-cogs fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_config}}</b></p>
+                  <a href="emby_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"> <img src="android-chrome-36x36.png" width="5%" class="w3-margin-right">{{lang.menu_option_emby}}</a> 
+                  <a href="oppo_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><img src="dragon.png" width="9%" class="w3-margin-right w3-text-red">{{lang.menu_option_oppo}}</a> 
+                  <a href="lib_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-folder fa-fw w3-margin-right"></i>{{lang.menu_option_lib}}</a>
+                  <a href="path_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-project-diagram fa-fw w3-margin-right"></i>{{lang.menu_option_paths}}</a>
+                  <a href="tv_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-tv fa-fw w3-margin-right"></i>{{lang.menu_option_tv}}</a>
+                  <a href="av_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding w3-teal w3-text-white"><img src="av-receiver-icon-2.jpg" width="10%" class="w3-margin-right">{{lang.menu_option_av}}</a>
+                  <a href="other_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-sliders-h fa-fw w3-margin-right"></i>{{lang.menu_option_other}}</a>
+          		<p class="w3-large"><b><i class="fa fa-server fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_Service}}</b></p>
+            	  <a href="status.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-heartbeat fa-fw w3-margin-right w3-text-red"></i>{{lang.menu_option_status}}</a> 
+            	  <a href="help.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="far fa-question-circle fa-fw w3-margin-right"></i>{{lang.menu_option_test}}</a> 
+          		 <br>
+        	</div>
+			<br>
+		
+ <div class="w3-main" style="margin-left:260px">
+<div class="w3-teal">
+  <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+	<!-- Right Column -->
+			<div class="w3-container w3-white">
+					<h2 class="w3-text-grey"><img src="av-receiver-icon-2.jpg" width="5%" class="w3-margin-right w3-xxlarge w3-text-teal"">{{lang.av_conf_title}}</h2>
+					  <h5 class="w3-opacity"><b>{{lang.av_conf_data}}</b></h5>
+               			<p><input ng-click="save_config()" class="w3-check" type="checkbox" ng-model="config.AV">
+					<label>{{lang.av_conf_enable}}</label></p>
+						<form name="myForm" ng-hide="!config.AV">
+						<label>{{lang.av_select_model}}: </label>
+						<select class="w3-select w3-border" ng-model="selectedTV" ng-options="x for x in config.av_dirs">
+						</select>
+						<p><label>{{lang.av_delay_hdmi}}</label>
+						<br>
+						<input class="w3-input w3-border" type="number" ng-model="config.av_delay_hdmi" placeholder={{lang.av_delay_hdmi}}>
+   					    <p><input ng-click="save_config()" class="w3-check" type="checkbox" ng-model="config.AV_Always_ON">
+						<label>{{lang.av_always_on}}</label></p>
+						</p>
+						</form>
+					<form ng-hide="hideLG || !config.AV">
+						<p><label>{{lang.av_conf_ip}}</label>
+						<br>
+						<input class="w3-input w3-border" type="text" ng-model="config.AV_Ip" placeholder={{lang.av_conf_ip}}>
+   					    </p>
+						<div class="w3-bar w3-right-align">
+						<button ng-click="av_test_on()" class="w3-btn w3-teal"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_on></i> {{av_test_on_button}}</button> 
+						<button ng-click="av_test_off()" class="w3-btn w3-teal"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_off></i> {{av_test_off_button}}</button> 
+						<br>
+						<br>
+					    </div>
+						<p>
+						<label>{{lang.av_conf_source}} </label>
+						<select class="w3-select w3-border" ng-model="SelSource" ng-options="x.Name for x in config.AV_SOURCES">
+						</select> 
+						</p>
+						<div class="w3-bar w3-right-align">
+						<button ng-click="get_av_sources()" class="w3-btn w3-teal" ><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_source></i> {{av_getsources_button}}</button>
+						<button ng-click="av_test_hdmi()" class="w3-btn w3-teal"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_hdmi></i> {{av_test_hdmi_button}}</button>
+					    <br>
+						<br>
+						</div>
+					 </form>
+					<form ng-hide="hideSCR || !config.AV">
+						<p><label>{{lang.av_script_on}}</label>
+						<br>
+						<input class="w3-input w3-border" type="text" ng-model="config.AV_CMD_POW_ON" placeholder={{lang.av_script_on}}>
+   					    </p>
+						<p>
+						<button ng-click="av_test_on()" class="w3-btn w3-teal  w3-right"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_on></i> {{av_test_on_button}}</button>
+						<br>
+						<br>
+					    </p>
+						<p><label>{{lang.av_script_hdmi}}</label>
+						<br>
+						<input class="w3-input w3-border" type="text" ng-model="config.AV_CMD_CHANGE_HDMI" placeholder={{lang.av_script_hdmi}}>
+   					    </p>
+						<p>
+						<button ng-click="av_test_hdmi()" class="w3-btn w3-teal  w3-right"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_hdmi></i> {{av_test_hdmi_button}}</button>
+						<br>
+						<br>
+					    </p>
+						<p>
+						<label>{{lang.av_script_off}}</label>
+						<input class="w3-input w3-border" type="text" ng-model="config.AV_CMD_POW_OFF" placeholder={{lang.av_script_off}}>
+						</p>
+						<p>
+						<button ng-click="av_test_off()" class="w3-btn w3-teal  w3-right""><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin_off></i> {{av_test_off_button}}</button>
+						<br>
+						<br>
+					    </p>
+					 </form>					 
+					  <p>
+					  <button ng-click="save_config() "class="w3-btn w3-teal w3-ripple" ng-hide="!config.AV">{{lang.av_save_button}}</button>
+					  <BR>
+					  </p>
+					 <form name="myForm2">
+						<BR>
+						</p>
+					    <a href="other_conf.html" onclick="w3_close()" class="w3-button w3-right w3-teal">{{lang.av_conf_next}}</a>
+						</p>
+						<BR>
+						<BR>
+					 </form>
+						<footer class="w3-container w3-teal w3-center w3-margin-top">
+							<p>Xnoppo</p>
+							<p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+						</footer> 			
+			</div>
+							</div> 			   
+	</div>        				
+</div>
+
+	   
+	<!-- End Right Column -->	   
+  <!-- End Grid -->
+ </div>
+   
+</div> 
+</div>
+<BR>
+  <!-- End Page Container -->
+</div>
+</body>
+</html>

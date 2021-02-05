@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<title>Xnoppo Web Setup</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://kit.fontawesome.com/6e2f13563d.js" crossorigin="anonymous"></script>
+<body>
+
+<script>
+var userLang = navigator.language || navigator.userLanguage;
+var app = angular.module('myApp', []);
+app.controller('xnoppo_config', function($scope, $http) 
+{
+  $scope.ready=false;
+  $scope.hide_spin = true;
+  $scope.error = true;
+  $http.get("get_state").then(function(response) {
+    console.log(response.data);
+	$scope.status = response.data;
+	$scope.cpu_perc = response.data.cpu_perc;
+	$scope.mem_perc = response.data.mem_perc;
+	if ($scope.cpu_perc < 50) {
+		$scope.color_cpu_perc = "w3-green"
+		}
+	if ($scope.cpu_perc > 50) {
+		$scope.color_cpu_perc = "w3-yellow"
+		}
+	if ($scope.cpu_perc > 90) {
+		$scope.color_cpu_perc = "w3-red"
+		}
+	if ($scope.mem_perc < 50) {
+		$scope.color_mem_perc = "w3-green"
+		}
+	if ($scope.mem_perc > 50) {
+		$scope.color_mem_perc = "w3-yellow"
+		}
+	if ($scope.mem_perc > 90) {
+		$scope.color_mem_perc = "w3-red"
+		}
+	$http.get("xnoppo_config").then(function(response) {
+		$scope.config = {};
+		$scope.config = response.data;
+		$scope.SelRefresh=$scope.config.refresh_time;
+		})
+	$http({method : "GET",url : "lang"}).then(
+	function mySuccess(response2) {
+		$scope.lang = {};
+		$scope.lang = response2.data;
+		console.log(response2.data);
+		$scope.refresh_list = [0,2,5,10,30,60];
+		setTimeout(() => {  $scope.get_state(); }, $scope.config.refresh_time * 1000);
+		$scope.not_conn=true;
+		if ($scope.status.Playstate == "Not_Connected") {
+			$scope.status_playstate = $scope.lang.status_playstate_NC
+			$scope.playdata = true;
+			$scope.spinner = true;
+			$scope.circle = true;
+			$scope.play_circle = true;
+			$scope.replay_circle = true;
+			$scope.not_conn=false;
+			}
+		if ($scope.status.Playstate == "Free") {
+			$scope.status_playstate = $scope.lang.status_playstate_free
+			$scope.playdata = true
+			$scope.spinner = true
+			$scope.circle = false
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Loading") {
+			$scope.status_playstate = $scope.lang.status_playstate_load
+			$scope.playdata = false
+			$scope.spinner = false
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Playing") {
+			$scope.status_playstate = $scope.lang.status_playstate_play
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = false
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Replay") {
+			$scope.status_playstate = $scope.lang.status_playstate_replay
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = false
+			}
+		$scope.ready=true;
+		$scope.check_version();
+		}, 
+	function myError(response) {
+		$scope.myWelcome = response.statusText;}
+		)
+	})
+	$scope.get_state = function () {
+		$http.get("get_state").then(function(response) {
+		$scope.hide_spin = true;
+		$scope.status = response.data;
+		$scope.cpu_perc = response.data.cpu_perc;
+		$scope.mem_perc = response.data.mem_perc;
+		if ($scope.cpu_perc < 50) {
+			$scope.color_cpu_perc = "w3-green"
+			}
+		if ($scope.cpu_perc > 50) {
+			$scope.color_cpu_perc = "w3-yellow"
+			}
+		if ($scope.cpu_perc > 90) {
+			$scope.color_cpu_perc = "w3-red"
+			}
+		if ($scope.mem_perc < 50) {
+			$scope.color_mem_perc = "w3-green"
+			}
+		if ($scope.mem_perc > 50) {
+			$scope.color_mem_perc = "w3-yellow"
+			}
+		if ($scope.mem_perc > 90) {
+			$scope.color_mem_perc = "w3-red"
+			}
+		$scope.not_conn=true;
+		if ($scope.status.Playstate == "Not_Connected") {
+			$scope.status_playstate = $scope.lang.status_playstate_NC
+			$scope.playdata = true;
+			$scope.spinner = true;
+			$scope.circle = true;
+			$scope.play_circle = true;
+			$scope.replay_circle = true;
+			$scope.not_conn=false;
+			}
+		if ($scope.status.Playstate == "Free") {
+			$scope.status_playstate = $scope.lang.status_playstate_free
+			$scope.playdata = true
+			$scope.spinner = true
+			$scope.circle = false
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Loading") {
+			$scope.status_playstate = $scope.lang.status_playstate_load
+			$scope.playdata = false
+			$scope.spinner = false
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Playing") {
+			$scope.status_playstate = $scope.lang.status_playstate_play
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = false
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Replay") {
+			$scope.status_playstate = $scope.lang.status_playstate_replay
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = false
+			}
+		if ($scope.config.refresh_time>0) {
+			setTimeout(() => {  $scope.get_state(); }, $scope.config.refresh_time * 1000);
+			}
+		})};
+	$scope.$watch('SelRefresh',function() {$scope.SelectRefresh($scope);});
+	$scope.SelectRefresh = function($scope) {
+		if ($scope.ready) {
+			if ($scope.config.refresh_time==0)
+				{
+				$scope.config.refresh_time=$scope.SelRefresh;
+				$scope.get_state();
+				$scope.save_config();
+				}
+			else
+				{
+				$scope.config.refresh_time=$scope.SelRefresh;
+				$scope.save_config();
+				}
+			}
+		};
+		
+    $scope.restart = function () {
+			$scope.hide_spin = false;
+			$http({method : "GET",url : "restart"}).then(function mySuccess(response) {
+			$scope.response = response.data;
+			$scope.hide_spin =true;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+			$scope.hide_spin =true;
+		  })};
+	$scope.update_version = function () {
+			$scope.hide_spin = false;
+			$http({method : "GET",url : "update_version"}).then(function mySuccess(response) {
+			$scope.response = response.data;
+			$scope.hide_spin =true;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+			$scope.hide_spin =true;
+			$scope.reload();
+		  })};
+	$scope.send_key = function (key) {
+			console.log(key);
+			$http({method : "GET",url : "send_key",params: {sendkey: key}}).then(function mySuccess(response) {
+			$scope.response = response.data;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+		  })};
+	$scope.check_version = function () {
+			$http({method : "GET",url : "check_version"}).then(function mySuccess(response) {
+			console.log(response.data);
+			if (response.data.new_version==true) {
+				$scope.error=false;
+				$scope.new_version = response.data.version;
+				}
+			else
+			{
+				$scope.error=true;
+				}
+			}, function myError(response) {
+			$scope.response = response.statusText;
+		  })};
+	$scope.reload = function()
+		{	   
+		location.reload();
+		};
+	$scope.save_config = function(){
+          $http.post("save_config", $scope.config)
+            .then(function(res){
+              console.log(res);
+			  $scope.check_version();
+            })
+			};
+});
+</script>
+<script>
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+</script>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:1000px;">
+  <!-- The Grid -->
+      <!-- Left Column -->      
+		<div ng-app="myApp" ng-cloak ng-controller="xnoppo_config" class="w3-white">		
+        	<div class="w3-sidebar w3-bar-block w3-collapse w3-white w3-text-grey " style="width:250px;" id="mySidebar">
+			<button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">{{menu_option_close}} &times;</button>
+				<div class="w3-display-container">
+				  <img src="https://www.avpasion.com/wp-content/uploads/2019/04/20190417_154630-2056x1542.jpeg" style="width:100%" alt="Xnoppo">
+				  <div class="w3-display-bottomleft w3-container w3-text-white">
+					<h2>Xnoppo</h2>
+				  </div>
+				</div>			
+        		<p class="w3-large"><b><i class="fa fa-cogs fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_config}}</b></p>
+                  <a href="emby_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"> <img src="android-chrome-36x36.png" width="10%" class="w3-margin-right">{{lang.menu_option_emby}}</a> 
+                  <a href="oppo_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><img src="dragon.png" width="9%" class="w3-margin-right w3-text-red">{{lang.menu_option_oppo}}</a> 
+                  <a href="lib_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-folder fa-fw w3-margin-right"></i>{{lang.menu_option_lib}}</a>
+                  <a href="path_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-project-diagram fa-fw w3-margin-right"></i>{{lang.menu_option_paths}}</a>
+                  <a href="tv_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-tv fa-fw w3-margin-right"></i>{{lang.menu_option_tv}}</a>
+                  <a href="av_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><img src="av-receiver-icon-2.jpg" width="10%" class="w3-margin-right">{{lang.menu_option_av}}</a>
+                  <a href="other_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-sliders-h fa-fw w3-margin-right"></i>{{lang.menu_option_other}}</a>
+          		<p class="w3-large"><b><i class="fa fa-server fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_Service}}</b></p>
+            	  <a href="status.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding w3-teal w3-text-white"><i class="fa fa-heartbeat fa-fw w3-margin-right w3-text-red"></i>{{lang.menu_option_status}}</a> 
+            	  <a href="help.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="far fa-question-circle fa-fw w3-margin-right"></i>{{lang.menu_option_test}}</a> 
+          		 <br>
+        	</div>
+			<br>
+		
+    <!-- End Left Column -->
+<div class="w3-main" style="margin-left:260px">
+<div class="w3-teal">
+  <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+	<!-- Right Column -->
+			<div class="w3-container w3-white">
+			        <h2 class="w3-text-grey"><i class="fa fa-heartbeat fa-fw w3-margin-right w3-xxlarge w3-text-red"></i>{{lang.status_conf_title}}</h2>
+					  <h5 class="w3-opacity"><b>{{lang.status_conf_data}}</b></h5>
+						<div class="w3-white">
+						<label><b>Xnoppo Version: </b>{{status.Version}}</label> 
+						</div>
+						<p>
+						<label>{{lang.status_refresh_time}}: </label>
+						<select class="w3-select w3-border" ng-model="SelRefresh" ng-options="x for x in refresh_list">
+						</select>
+						</p>
+						<BR>
+						<div class="w3-white">
+						<label><b>CPU:</b></label> 
+						<div class="w3-container {{color_cpu_perc}} w3-center" style="width:{{status.cpu_perc}}%">{{status.cpu_perc}}%
+						</div>
+						</div>
+						<div class="w3-white">
+						<label><b>RAM:</b></label> 
+						<div class="w3-container {{color_mem_perc}} w3-center" style="width:{{status.mem_perc}}%">{{status.mem_perc}}%
+						</div>
+						</div>
+						<BR>
+						<div class="w3-bar w3-left-align">
+							<label><b> {{lang.status_conf_status}}: </b> 
+							<i class="fas fa-circle w3-text-green" style="font-size:20px" ng-hide=circle></i>
+							<i class="fas fa-circle w3-text-red" style="font-size:20px" ng-hide=not_conn></i>
+							<i class="fas fa-play-circle w3-text-green" style="font-size:20px" ng-hide=play_circle></i>
+							<i class="fa fa-spinner w3-spin w3-text-red" style="font-size:20px" ng-hide=spinner></i>
+							<i class="fas fa-play-circle w3-text-red" style="font-size:20px" ng-hide=replay_circle></i>
+							{{status_playstate}}</label></p>
+						</div>
+						<div class="w3-bar w3-left-align">
+						<form name="myForm" ng-hide=playdata>
+							<label><b> {{lang.status_conf_movie}}: </b> {{status.playedtitle}}</label></p>
+							<label><b> {{lang.status_conf_server}}: </b> {{status.server}}</label></p>
+							<label><b> {{lang.status_conf_folder}}: </b> {{status.folder}}</label></p>
+							<label><b> {{lang.status_conf_file}}: </b> {{status.filename}}</label></p>
+						<BR>
+						<button ng-click="send_key('STP')" class="w3-btn	w3-text-blue w3-xlarge"><i class="fas fa-stop" ng-hide=hide_></i></button>
+						<button ng-click="send_key('PLA')" class="w3-btn	w3-text-blue w3-xlarge"><i class="fas fa-play" ng-hide=hide_></i></button>
+						<button ng-click="send_key('PAU')" class="w3-btn w3-text-blue w3-xlarge"><i class="fas fa-pause" ng-hide=hide_></i></button>
+						</form>
+						<p><input ng-click="save_config()" class="w3-check" type="checkbox" ng-model="config.check_beta">
+						<label>{{lang.status_check_beta}}</label></p>
+						<form name="myForm2" ng-hide=error>
+						
+						<div class="w3-tag w3-round w3-green" style="padding:3px">
+							<div class="w3-tag w3-round w3-green w3-border w3-border-white">
+								<b> {{lang.status_new_version}}: </b> {{new_version}}
+							</div>
+							
+						</div>
+						</BR>
+						</form>
+						<div >
+						</BR>
+						<a href="log.txt" download class="w3-btn w3-teal">Download Log</a>
+						<a href="remote.html" class="w3-btn w3-teal">Remote</a>
+						</BR>
+						</div>					
+							 <div class="w3-bar w3-right-align">
+							 <BR>
+								<button ng-click="restart()" class="w3-btn w3-teal"><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin></i> {{lang.status_restart_button}}</button>
+								<button ng-click="update_version()" class="w3-btn  w3-teal" ng-disabled="error">{{lang.status_update_button}}</button>
+							<BR>
+							</div>
+						<footer class="w3-container w3-teal w3-center w3-margin-top">
+							<p>Xnoppo</p>
+							<p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+						</footer> 			
+			</div>
+							</div> 			   
+	</div>        				
+</div>
+
+	   
+	<!-- End Right Column -->	   
+  <!-- End Grid -->
+ </div>  
+</body>
+</html>

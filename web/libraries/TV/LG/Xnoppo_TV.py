@@ -225,3 +225,70 @@ def tv_set_prev(config):
             logging.info('Lanzamos %s',config["current_LG"])
             launch_info = app.launch(ap)
     return("OK")
+
+def tv_test_conn(config):
+    if config["TV_KEY"]=='':
+        store = {}
+    else :
+        store = {'client_key': config["TV_KEY"] }
+    client = WebOSClient(config["TV_IP"])
+    try:
+        client.connect()
+        return('OK')
+    except:
+        return("FAILURE")
+
+def get_tv_key(config):
+    store = {}
+    client = WebOSClient(config["TV_IP"])
+    try:
+        client.connect()
+        for status in client.register(store):
+            if status == WebOSClient.PROMPTED:
+               print("Por favor acepta la conexion en la TV")
+               logging.info ("Por favor acepta la conexion en la TV")
+            elif status == WebOSClient.REGISTERED:
+               print("Registro correcto!")
+               logging.info ("Registro correcto!")
+        config["TV_KEY"]=store["client_key"]
+        return("OK")
+    except:
+        return("FAILURE")
+
+def get_tv_sources(config):
+    if config["TV_KEY"]=='':
+        store = {}
+    else :
+        store = {'client_key': config["TV_KEY"] }
+    client = WebOSClient(config["TV_IP"])
+    try:
+        client.connect()
+        for status in client.register(store):
+            if status == WebOSClient.PROMPTED:
+               print("Por favor acepta la conexion en la TV")
+               logging.info ("Por favor acepta la conexion en la TV")
+            elif status == WebOSClient.REGISTERED:
+               print("Registro correcto!")
+               logging.info ("Registro correcto!")
+    except:
+            return("FAILURE")
+            print("Error conexion")
+    #try:
+    if True:
+            source_control = SourceControl(client)
+            sources = source_control.list_sources()
+            index=0
+            source_list=[]
+            for source in sources:
+                tv_source={}
+                tv_source["index"]=index
+                tv_source["nombre"]=str(source)
+                source_list.append(tv_source)
+                print ('Fuente indice: '+ str(index) + ' - Entrada: '+ str(source))
+                index=index+1
+            config["TV_SOURCES"]=source_list
+            return("OK")
+    #except:
+    else:
+                print("Error consultando el TV")
+                return("FAILURE")

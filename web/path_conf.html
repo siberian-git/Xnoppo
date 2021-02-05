@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<title>Xnoppo Web Setup</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+</style>
+  <script src="https://kit.fontawesome.com/6e2f13563d.js" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script>
+<body>
+
+<script>
+var userLang = navigator.language || navigator.userLanguage;
+
+var app = angular.module('myApp', []);
+app.controller('xnoppo_config', function($scope, $http) 
+{
+  $scope.ready=false;
+  $http.get("xnoppo_config").then(function(response) {
+    $scope.config = {};
+    $scope.config = response.data;
+	console.log(response.data);
+	$scope.hide_spin = true;
+	$scope.hide_folders=true;
+	$scope.error = true;
+	$scope.hide_alert_oppo =true;
+	$scope.hideform = true;
+	$scope.edit = true;
+	$scope.incomplete = false;
+	$http({method : "GET",url : "lang"}).then(
+	function mySuccess(response2) {
+		$scope.lang = {};
+		$scope.lang = response2.data;
+		$scope.path_test_button = $scope.lang.path_test_button;
+		$scope.path_nav_button = "far fa-folder"
+		console.log(response2.data);
+		$scope.ready=true;
+		}, 
+	function myError(response) {
+		$scope.myWelcome = response.statusText;}
+	)
+	$http.post("check_oppo", $scope.config).then(function mySuccess(response) {
+		}, function myError(response) {
+		$scope.hide_alert_oppo =false;
+	 })
+	})
+    ;
+	$scope.editPath = function(id) {
+	$scope.hideform = false;
+	$scope.hide_folders = true;
+	$scope.path_nav_button = "far fa-folder";
+	if (id == 'new') {
+	  $scope.edit = true;
+	  $scope.incomplete = true;
+	  $scope.ref = 0;
+	  $scope.server_test = {};
+	  $scope.name = '';
+	  $scope.Emby_Path = '';
+	  $scope.Oppo_Path = '';
+	  $scope.Tested = false;
+	  $scope.path_test_button = $scope.lang.path_test_button;
+	  } else {
+	  $scope.edit = false;
+	  $scope.path_test_button = $scope.lang.path_test_button;
+	  for (server in $scope.config.servers)
+	  {
+	  if ($scope.config.servers[server].name == id) {
+	    $scope.ref = server;
+		$scope.server_test = $scope.config.servers[server];
+		$scope.name = $scope.config.servers[server].name;
+		$scope.Emby_Path = $scope.config.servers[server].Emby_Path; 
+		$scope.Oppo_Path = $scope.config.servers[server].Oppo_Path; 
+		$scope.Tested = $scope.config.servers[server].Test_OK;
+	  }
+	  }
+	}};
+	$scope.$watch('name',function() {$scope.test();});
+	$scope.$watch('Emby_Path',function() {$scope.test();});
+	$scope.$watch('Oppo_Path',function() {$scope.test();});
+	$scope.$watch('selectPath',function() {$scope.SelPath($scope);});
+	$scope.test = function() {
+	if ($scope.name!="" && $scope.Emby_Path!="" && $scope.Oppo_Path!="") {
+	console.log($scope.Emby_Path);
+	$scope.error =false;
+	} else { $scope.error =true;console.log($scope.name);}
+	};
+	$scope.SelPath = function($scope) {
+		if ($scope.ready && $scope.selectPath!=null) {
+			console.log($scope.selectPath)
+			if ($scope.selectPath.Foldername=='..'){
+				$scope.Oppo_Path=$scope.Oppo_Path.replace(/\\/g, '/');
+				console.log($scope.Oppo_Path);
+				result = $scope.Oppo_Path.lastIndexOf("/");
+				if (result>0) {
+					console.log(result);
+					console.log($scope.Oppo_Path);
+					$scope.Oppo_Path=$scope.Oppo_Path.substring(0,result);
+					console.log($scope.Oppo_Path)
+				}
+				else {
+				$scope.Oppo_Path='/';
+				}
+			}
+			else{
+				console.log($scope.Oppo_Path);
+				if ($scope.Oppo_Path=='/')
+					$scope.Oppo_Path='/' + $scope.selectPath.Foldername
+				else {
+					$scope.Oppo_Path=$scope.Oppo_Path + '/' + $scope.selectPath.Foldername;
+					}
+			}
+			$scope.navigate_path();
+			};
+		
+		};
+	$scope.save_path = function(){
+			$scope.config.servers[$scope.ref].name=$scope.name;
+			$scope.config.servers[$scope.ref].Emby_Path=$scope.Emby_Path;
+			$scope.config.servers[$scope.ref].Oppo_Path=$scope.Oppo_Path;
+			$scope.config.servers[$scope.ref].Test_OK=$scope.Tested;
+			$scope.hideform = true;
+			$scope.hide_folders = true;
+			$scope.path_nav_button = "far fa-folder";
+			$scope.save_config();
+			};
+	$scope.delete = function(id){
+			console.log(id);
+			for (server in $scope.config.servers)
+			  {
+			  if ($scope.config.servers[server].name == id) {
+				$scope.config.servers.splice(server,1);
+			  }
+			}
+			$scope.save_config();
+			};
+	$scope.folder_nav = function(){
+			console.log($scope.hide_folders)
+			if ($scope.hide_folders) {
+				$scope.hide_folders = false;
+				$scope.path_nav_button = "far fa-folder-open";
+				$scope.navigate_path();
+			}
+			else {
+				$scope.hide_folders = true;
+				$scope.path_nav_button = "far fa-folder";
+				}
+			};
+	$scope.refreshPath = function(){
+			$http({method : "GET",url : "refresh_paths"}).then(
+				function mySuccess(response) {
+				    $scope.config = response.data;
+					$scope.save_config();
+					}, 
+				function myError(response) {
+					$scope.myWelcome = response.statusText;}
+				)
+			};
+	$scope.save_config = function(){
+          $http.post("save_config", $scope.config)
+            .then(function(res){
+              console.log(res);
+            })};
+	$scope.test_path = function () {
+			$scope.path_test_button = $scope.lang.path_test_button_test;
+			$scope.hide_spin = false;
+			$scope.data = {}
+			$scope.data.name=$scope.name;
+			$scope.data.Emby_Path=$scope.Emby_Path;
+			$scope.data.Oppo_Path=$scope.Oppo_Path;
+			$scope.data.Test_OK=$scope.Tested;
+			$http.post("test_path", $scope.data).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.error = false;
+			$scope.path_test_button = $scope.lang.path_test_button_ok;
+			$scope.hide_spin =true;
+			$scope.Tested=true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.error = true;
+			$scope.path_test_button = $scope.lang.path_test_button_err;
+			$scope.hide_spin =true;
+			$scope.Tested = false;
+		  })};
+	$scope.navigate_path = function () {
+			$scope.path_nav_button = "fa fa-spinner w3-spin";
+			$scope.hide_nav_spin = false;
+			$scope.data = {}
+			if ($scope.Oppo_Path == "") 
+			 {$scope.Oppo_Path = '/'};
+			$scope.data.path=$scope.Oppo_Path;
+			console.log($scope.data)
+			$scope.ready=false;
+			$http.post("navigate_path", $scope.data).then(function mySuccess(responset) {
+			$scope.path_nav_button = "far fa-folder-open";
+			$scope.hide_nav_spin =true;
+			console.log(responset.data)
+			$scope.path_dirs = responset.data
+			$scope.ready=true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.path_nav_button = "far fa-folder-open";
+			$scope.hide_nav_spin =true;
+			console.log(responset.data)
+			$scope.ready=true;
+		  })};	
+});
+</script>
+<script>
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+</script>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:1000px;">
+  <!-- The Grid -->
+      <!-- Left Column -->      
+		<div ng-app="myApp" ng-cloak ng-controller="xnoppo_config" class="w3-white">		
+        	<div class="w3-sidebar w3-bar-block w3-collapse w3-white w3-text-grey " style="width:250px;" id="mySidebar">
+			<button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">{{menu_option_close}} &times;</button>
+				<div class="w3-display-container">
+				  <img src="https://www.avpasion.com/wp-content/uploads/2019/04/20190417_154630-2056x1542.jpeg" style="width:100%" alt="Xnoppo">
+				  <div class="w3-display-bottomleft w3-container w3-text-white">
+					<h2>Xnoppo</h2>
+				  </div>
+				</div>			
+        		<p class="w3-large"><b><i class="fa fa-cogs fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_config}}</b></p>
+                  <a href="emby_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"> <img src="android-chrome-36x36.png" width="10%" class="w3-margin-right">{{lang.menu_option_emby}}</a> 
+                  <a href="oppo_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><img src="dragon.png" width="9%" class="w3-margin-right w3-text-red">{{lang.menu_option_oppo}}</a> 
+                  <a href="lib_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-folder fa-fw w3-margin-right"></i>{{lang.menu_option_lib}}</a>
+                  <a href="path_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding  w3-teal w3-text-white"><i class="fa fa-project-diagram fa-fw w3-margin-right"></i>{{lang.menu_option_paths}}</a>
+                  <a href="tv_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-tv fa-fw w3-margin-right"></i>{{lang.menu_option_tv}}</a>
+                  <a href="av_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><img src="av-receiver-icon-2.jpg" width="10%" class="w3-margin-right">{{lang.menu_option_av}}</a>
+                  <a href="other_conf.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-sliders-h fa-fw w3-margin-right"></i>{{lang.menu_option_other}}</a>
+          		<p class="w3-large"><b><i class="fa fa-server fa-fw w3-margin-right w3-text-teal"></i>{{lang.menu_title_Service}}</b></p>
+            	  <a href="status.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-heartbeat fa-fw w3-margin-right w3-text-red"></i>{{lang.menu_option_status}}</a> 
+            	  <a href="help.html" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="far fa-question-circle fa-fw w3-margin-right"></i>{{lang.menu_option_test}}</a> 
+        	</div>
+		
+    <!-- End Left Column -->
+<div class="w3-main" style="margin-left:260px">
+<div class="w3-teal">
+  <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+	<!-- Right Column -->
+			<div class="w3-container w3-white">
+					<h2 class="w3-text-grey"><i class="fa fa-project-diagram w3-margin-right w3-xxlarge"></i>{{lang.path_conf_title}}</h2>
+					  <h5 class="w3-opacity"><b>{{lang.path_conf_data}}</b></h5>
+					  	<div class="w3-panel w3-red w3-round w3-card-4 " ng-hide=hide_alert_oppo>
+							<h3>{{lang.warning_label}}</h3>
+							<p>{{lang.warning_no_oppo_conn}}</p>
+					</div>
+					<table class="w3-table w3-bordered w3-striped">
+					  <tr>
+						<th>{{lang.path_conf_name}}</th>
+						<th class="w3-center">{{lang.path_conf_tested}}</th>
+					  </tr>
+					  <tr ng-repeat="x in config.servers">
+						<td>{{ x.name }}</td>
+						<td class="w3-center"><i class="fa fa-check w3-text-green" style="font-size:20px" ng-hide=!x.Test_OK></i><i class="fa fa-times-circle w3-text-red w3-center" style="font-size:20px" ng-hide=x.Test_OK></i></td>
+						<td>
+   						  <button class="w3-btn w3-ripple" ng-click="delete(x.name)"><i class="far fa-minus-square"></i> {{lang.path_conf_delete}}</button>						</td>
+						<td>
+						  <button class="w3-btn w3-ripple" ng-click="editPath(x.name)">	<i class="far fa-edit"></i> {{lang.path_conf_edit}}</button>
+						</td>				
+					  </tr>
+					</table>
+					<br>
+					<button class="w3-btn w3-teal w3-ripple" ng-click="editPath('new')"><i class="far fa-plus-square"></i> {{lang.path_conf_new}}</button>
+					<button class="w3-btn w3-teal w3-ripple" ng-click="refreshPath()"><i class="fas fa-sync"></i> {{lang.path_conf_refresh}}</button>
+
+					<form ng-hide="hideform">
+					  <h3 ng-show="edit">{{lang.path_conf_new}}</h3>
+					  <h3 ng-hide="edit">{{lang.path_conf_edit}}</h3>
+						<label>{{lang.path_conf_name}}</label>
+						<input class="w3-input w3-border" type="text" ng-model="name" placeholder={{lang.path_conf_name}}>
+					  <br>
+						<label>{{lang.path_conf_emby_path}}</label>
+						<input class="w3-input w3-border" type="text" ng-model="Emby_Path" placeholder={{lang.path_conf_emby_path}}>
+					  <br>
+						<label>{{lang.path_conf_oppo_path}}</label>
+						<input class="w3-input w3-border w3-cell" style="width:91%" type="text" ng-model="Oppo_Path" placeholder={{lang.path_conf_oppo_path}}>  <button ng-click="folder_nav()" class="w3-btn w3-teal w3-cell" style="width:8%"><i class="{{path_nav_button}}" style="font-size:20px"></i></button>
+						<select class="w3-select w3-border" ng-model="selectPath" size="8" ng-options="x.Foldername for x in path_dirs" ng-hide=hide_folders>
+						</select>
+					  <br>
+					  <button ng-click="test_path()" class="w3-btn w3-teal "><i class="fa fa-spinner w3-spin" style="font-size:20px" ng-hide=hide_spin></i> {{path_test_button}}</button>
+					  <button ng-click="save_path() "class="w3-btn w3-teal w3-ripple" ng-disabled="error">{{lang.path_save_button}}</button>
+					<BR>
+					<BR>
+					<BR>	
+						</form>
+						<div>
+						<a href="tv_conf.html" onclick="w3_close()" class="w3-button w3-right w3-teal">{{lang.path_conf_next}}</a>
+						</div>
+						<BR>
+
+						<BR>
+						
+						<footer class="w3-container w3-teal w3-center w3-margin-top">
+							<p>Xnoppo</p>
+							<p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+						</footer> 			
+			</div>
+							</div> 			   
+	</div>        				
+</div>
+
+	   
+	<!-- End Right Column -->	   
+  <!-- End Grid -->
+ </div>
+   
+</div> 
+</div>
+<BR>
+  <!-- End Page Container -->
+</body>
+</html>

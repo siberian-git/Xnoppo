@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<title>Xnoppo Web Setup</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://kit.fontawesome.com/6e2f13563d.js" crossorigin="anonymous"></script>
+<body>
+
+<script>
+var userLang = navigator.language || navigator.userLanguage;
+var app = angular.module('myApp', []);
+app.controller('xnoppo_config', function($scope, $http) 
+{
+  $scope.ready=false;
+  $scope.hide_spin = true;
+  $scope.stats = true;
+  $scope.hideLG = true;
+  $scope.error = true;
+  $http.get("get_state").then(function(response) {
+    console.log(response.data);
+	$scope.status = response.data;
+	$scope.cpu_perc = response.data.cpu_perc;
+	$scope.mem_perc = response.data.mem_perc;
+	if ($scope.cpu_perc < 50) {
+		$scope.color_cpu_perc = "w3-green"
+		}
+	if ($scope.cpu_perc > 50) {
+		$scope.color_cpu_perc = "w3-yellow"
+		}
+	if ($scope.cpu_perc > 90) {
+		$scope.color_cpu_perc = "w3-red"
+		}
+	if ($scope.mem_perc < 50) {
+		$scope.color_mem_perc = "w3-green"
+		}
+	if ($scope.mem_perc > 50) {
+		$scope.color_mem_perc = "w3-yellow"
+		}
+	if ($scope.mem_perc > 90) {
+		$scope.color_mem_perc = "w3-red"
+		}
+	$http.get("xnoppo_config").then(function(response) {
+		$scope.config = {};
+		$scope.config = response.data;
+		$scope.SelRefresh=$scope.config.refresh_time;
+		})
+	$http({method : "GET",url : "lang"}).then(
+	function mySuccess(response2) {
+		$scope.lang = {};
+		$scope.lang = response2.data;
+		console.log(response2.data);
+		$scope.refresh_list = [0,2,5,10,30,60];
+		setTimeout(() => {  $scope.get_state(); }, $scope.config.refresh_time * 1000);
+		$scope.not_conn=true;
+		if ($scope.status.Playstate == "Not_Connected") {
+			$scope.status_playstate = $scope.lang.status_playstate_NC
+			$scope.playdata = true;
+			$scope.spinner = true;
+			$scope.circle = true;
+			$scope.play_circle = true;
+			$scope.replay_circle = true;
+			$scope.not_conn=false;
+			}
+		if ($scope.status.Playstate == "Free") {
+			$scope.status_playstate = $scope.lang.status_playstate_free
+			$scope.playdata = true
+			$scope.spinner = true
+			$scope.circle = false
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Loading") {
+			$scope.status_playstate = $scope.lang.status_playstate_load
+			$scope.playdata = false
+			$scope.spinner = false
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Playing") {
+			$scope.status_playstate = $scope.lang.status_playstate_play
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = false
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Replay") {
+			$scope.status_playstate = $scope.lang.status_playstate_replay
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = false
+			}
+		$scope.ready=true;
+		$scope.check_version();
+		}, 
+	function myError(response) {
+		$scope.myWelcome = response.statusText;}
+		)
+	})
+	$scope.get_state = function () {
+		$http.get("get_state").then(function(response) {
+		$scope.hide_spin = true;
+		$scope.status = response.data;
+		$scope.cpu_perc = response.data.cpu_perc;
+		$scope.mem_perc = response.data.mem_perc;
+		if ($scope.cpu_perc < 50) {
+			$scope.color_cpu_perc = "w3-green"
+			}
+		if ($scope.cpu_perc > 50) {
+			$scope.color_cpu_perc = "w3-yellow"
+			}
+		if ($scope.cpu_perc > 90) {
+			$scope.color_cpu_perc = "w3-red"
+			}
+		if ($scope.mem_perc < 50) {
+			$scope.color_mem_perc = "w3-green"
+			}
+		if ($scope.mem_perc > 50) {
+			$scope.color_mem_perc = "w3-yellow"
+			}
+		if ($scope.mem_perc > 90) {
+			$scope.color_mem_perc = "w3-red"
+			}
+		$scope.not_conn=true;
+		if ($scope.status.Playstate == "Not_Connected") {
+			$scope.status_playstate = $scope.lang.status_playstate_NC
+			$scope.playdata = true;
+			$scope.spinner = true;
+			$scope.circle = true;
+			$scope.play_circle = true;
+			$scope.replay_circle = true;
+			$scope.not_conn=false;
+			}
+		if ($scope.status.Playstate == "Free") {
+			$scope.status_playstate = $scope.lang.status_playstate_free
+			$scope.playdata = true
+			$scope.spinner = true
+			$scope.circle = false
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Loading") {
+			$scope.status_playstate = $scope.lang.status_playstate_load
+			$scope.playdata = false
+			$scope.spinner = false
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Playing") {
+			$scope.status_playstate = $scope.lang.status_playstate_play
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = false
+			$scope.replay_circle = true
+			}
+		if ($scope.status.Playstate == "Replay") {
+			$scope.status_playstate = $scope.lang.status_playstate_replay
+			$scope.playdata = false
+			$scope.spinner = true
+			$scope.circle = true
+			$scope.play_circle = true
+			$scope.replay_circle = false
+			}
+		if ($scope.config.refresh_time>0) {
+			setTimeout(() => {  $scope.get_state(); }, $scope.config.refresh_time * 1000);
+			}
+		})};
+	$scope.$watch('SelSource',function() {$scope.SelSou($scope);});
+	$scope.$watch('SelRefresh',function() {$scope.SelectRefresh($scope);});
+	$scope.SelectRefresh = function($scope) {
+		if ($scope.ready) {
+			if ($scope.config.refresh_time==0)
+				{
+				$scope.config.refresh_time=$scope.SelRefresh;
+				$scope.get_state();
+				$scope.save_config();
+				}
+			else
+				{
+				$scope.config.refresh_time=$scope.SelRefresh;
+				$scope.save_config();
+				}
+			}
+		};
+	$scope.SelSou = function($scope) {
+		if ($scope.ready) {
+			console.log($scope.SelSource);
+			if ($scope.config.Source!=$scope.SelSource.index){
+				$scope.config.Source=$scope.SelSource.index;
+				$scope.tv_test_init();
+			    console.log($scope.config.Source);};
+			};
+		};
+
+    $scope.restart = function () {
+			$scope.hide_spin = false;
+			$http({method : "GET",url : "restart"}).then(function mySuccess(response) {
+			$scope.response = response.data;
+			$scope.hide_spin =true;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+			$scope.hide_spin =true;
+		  })};
+	$scope.update_version = function () {
+			$scope.hide_spin = false;
+			$http({method : "GET",url : "update_version"}).then(function mySuccess(response) {
+			$scope.response = response.data;
+			$scope.hide_spin =true;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+			$scope.hide_spin =true;
+			$scope.reload();
+		  })};
+	$scope.send_key = function (key) {
+			console.log(key);
+			$http({method : "GET",url : "send_key",params: {sendkey: key}}).then(function mySuccess(response) {
+			$scope.response = response.data;
+			}, function myError(response) {
+			$scope.response = response.statusText;
+		  })};
+	$scope.check_version = function () {
+			$http({method : "GET",url : "check_version"}).then(function mySuccess(response) {
+			console.log(response.data);
+			if (response.data.new_version==true) {
+				$scope.error=false;
+				$scope.new_version = response.data.version;
+				}
+			else
+			{
+				$scope.error=true;
+				}
+			}, function myError(response) {
+			$scope.response = response.statusText;
+		  })};
+	$scope.tv_test_conn = function () {
+			$scope.tv_test_button = $scope.lang.tv_test_button_test;
+			$scope.hide_spin = false;
+			$http.post("tv_test_conn", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.error = false;
+			$scope.tv_test_button = $scope.lang.tv_test_button_ok;
+			$scope.hide_spin =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.error = true;
+			$scope.tv_test_button = $scope.lang.tv_test_button_err;
+			$scope.hide_spin =true;
+		  })};
+	$scope.get_tv_sources = function () {
+			$scope.tv_getsources_button = $scope.lang.tv_getsources_button_test;
+			$scope.hide_spin_source = false;
+			$http.post("get_tv_sources", $scope.config).then(function mySuccess(responset) {
+			$http.get("xnoppo_config").then(function(response) {
+				$scope.config = {};
+				$scope.config = response.data;
+				$scope.selectedTV=$scope.config.TV_model;
+				$scope.SelSource=$scope.config.TV_SOURCES[$scope.config.Source];
+				console.log(response.data);});
+			$scope.error = false;
+			$scope.tv_getsources_button = $scope.lang.tv_getsources_button_ok;
+			$scope.hide_spin_source =true;
+			}, function myError(responset) {
+			console.log(responset.data);
+			$scope.responset = responset.statusText;
+			$scope.error = true;
+			$scope.tv_getsources_button = $scope.lang.tv_getsources_button_err;
+			$scope.hide_spin_source =true;
+		  })};
+	$scope.tv_test_init = function () {
+			$scope.tv_test_init_button = $scope.lang.tv_test_init_button_test;
+			$scope.hide_init = false;
+			$http.post("tv_test_init", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.tv_test_init_button = $scope.lang.tv_test_init_button_ok;
+			$scope.hide_init =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.tv_test_init_button = $scope.lang.tv_test_init_button_err;
+			$scope.hide_init =true;
+		  })};
+	
+	$scope.set_stats = function () {
+		if ($scope.stats) {$scope.stats=false}
+		else {$scope.stats=true}
+	};
+	$scope.set_LG = function () {
+		if ($scope.hideLG) {$scope.hideLG=false}
+		else {$scope.hideLG=true}
+	};
+	$scope.tv_test_end = function () {
+			$scope.tv_test_end_button = $scope.lang.tv_test_end_button_test;
+			$scope.hide_end = false;
+			$http.post("tv_test_end", $scope.config).then(function mySuccess(responset) {
+			$scope.responset = responset.data;
+			$scope.tv_test_end_button = $scope.lang.tv_test_end_button_ok;
+			$scope.hide_end =true;
+			}, function myError(responset) {
+			$scope.responset = responset.statusText;
+			$scope.tv_test_end_button = $scope.lang.tv_test_end_button_err;
+			$scope.hide_end =true;
+		  })};
+	$scope.reload = function()
+		{	   
+		location.reload();
+		};
+	$scope.save_config = function(){
+          $http.post("save_config", $scope.config)
+            .then(function(res){
+              console.log(res);
+			  $scope.check_version();
+            })
+			};
+});
+</script>
+<script>
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+}
+
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+}
+</script>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:600px;">
+  <!-- The Grid -->
+      <!-- Left Column -->      
+<div ng-app="myApp" ng-cloak ng-controller="xnoppo_config" class="w3-white">		
+    <!-- End Left Column -->
+<div class="w3-main">
+<div class="w3-teal">
+	<!-- Right Column -->
+			<div class="w3-container w3-white">
+						<div class="w3-row-padding">
+							<div class="w3-col" style="width:50%">
+								<button ng-click="send_key('PON')" class="w3-btn	w3-round w3-text-green w3-xxlarge"><i class="fas fa-power-off" ng-hide=hide_></i></button>						
+							</div>
+							<div class="w3-col w3-right-align" style="width:50%">
+								<button ng-click="send_key('EJT')" class="w3-btn	w3-round w3-text-gray w3-xxlarge"><i class="fas fa-eject" ng-hide=!config.BRDisc></i></button>
+								<button ng-click="send_key('POF')" class="w3-btn	w3-round w3-text-red w3-xxlarge"><i class="fas fa-power-off" ng-hide=hide_></i></button></div>
+						</div>
+						<div class="w3-row-padding">
+							<div class="w3-col w3-center" style="width:100%">
+							<button ng-click="send_key('NUP')" class="w3-btn	w3-round w3-text-indigo w3-xxlarge"><i class="fas fa-chevron-up" ng-hide=hide_></i></button>
+							</div>
+						</div>
+						<div class="w3-row-padding">
+							<div class="w3-col w3-right-align" style="width:33%">
+								<button ng-click="send_key('NLT')" class="w3-btn	w3-round w3-text-indigo w3-xxlarge"><i class="fas fa-chevron-left" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-center" style="width:33%">
+								<button ng-click="send_key('SEL')" class="w3-btn	w3-round w3-text-indigo w3-xxlarge"><b>OK</b></button>
+							</div>
+							<div class="w3-col w3-left-align" style="width:33%">
+								<button ng-click="send_key('NRT')" class="w3-btn	w3-round w3-text-indigo w3-xxlarge"><i class="fas fa-chevron-right" ng-hide=hide_></i></button>
+							</div>
+						</div>
+						<div class="w3-row-padding">
+							<div class="w3-col w3-center" style="width:100%">
+								<button ng-click="send_key('NDN')" class="w3-btn	w3-round w3-text-indigo w3-xxlarge"><i class="fas fa-chevron-down" ng-hide=hide_></i></button>
+							</div>
+						</div>
+						<div class="w3-row-padding">
+							<div class="w3-col w3-left-align" style="width:40%">
+								<button ng-click="send_key('OSD')" class="w3-btn	w3-round w3-text-blue w3-xxlarge "><i class="fas fa-info" ng-hide=hide_></i></button>
+								<button ng-click="send_key('INH')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-info-circle" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col  w3-right-align" style="width:45%">
+								<button ng-click="send_key('AUD')" class="w3-btn	w3-round w3-text-orange w3-xxlarge"><i class="fas fa-file-audio" ng-hide=hide_></i></button>
+								<button ng-click="send_key('SUB')" class="w3-btn	w3-round w3-text-black w3-xxlarge"><i class="fas fa-closed-captioning" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-right-align" style="width:15%">
+								<button ng-click="send_key('RET')" class="w3-btn	w3-round w3-text-indigo w3-xxlarge"><i class="fas fa-undo" ng-hide=hide_></i></button>
+							</div>
+						</div>
+						<div class="w3-row-padding">
+							<div class="w3-col w3-right-align" style="width:33%">
+								<button ng-click="send_key('STP')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-stop" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-center" style="width:33%">
+								<button ng-click="send_key('PLA')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-play" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-left-align" style="width:33%">
+								<button ng-click="send_key('PAU')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-pause" ng-hide=hide_></i></button>
+							</div>
+						</div>
+						<div class="w3-row-padding">
+							<div class="w3-col w3-right-align" style="width:25%">
+								<button ng-click="send_key('PRE')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-fast-backward" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-center" style="width:25%">
+								<button ng-click="send_key('REV')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-backward" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-center" style="width:25%">
+								<button ng-click="send_key('FWD')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-forward" ng-hide=hide_></i></button>
+							</div>
+							<div class="w3-col w3-left-align" style="width:25%">
+								<button ng-click="send_key('NXT')" class="w3-btn	w3-round w3-text-blue w3-xxlarge"><i class="fas fa-fast-forward" ng-hide=hide_></i></button>					
+							</div>
+
+						</div>
+						<BR>
+						<div class="w3-row-padding">
+							<div class="w3-col" style="width:50%">
+								<button ng-click="set_LG()" class="w3-btn w3-round w3-text-green w3-xxlarge"><i class="fas fa-tv" ng-hide=hide_></i></button>				
+								<button ng-click="set_stats()" class="w3-btn w3-round w3-text-green w3-xxlarge"><i class="fas fa-chart-bar" ng-hide=hide_></i></button>				
+							</div>
+							<div class="w3-col w3-right-align" style="width:50%">
+								<a href="status.html" class="w3-btn w3-round w3-text-green w3-xxlarge"><i class="fa fa-cogs" ng-hide=hide_></i></a>
+							</div>
+						</div>
+				<form ng-hide="hideLG || !config.TV" >
+				<BR>
+				<div class="w3-row-padding">
+						<div class="w3-col" style="width:100px">
+						<a class="w3-white w3-middle" ><b>TV HDMI: </b></a> 
+						</div>
+						<div class="w3-rest"><select class="w3-select w3-border" ng-model="SelSource" ng-options="x.nombre for x in config.TV_SOURCES">
+						</select>
+						</div>
+				</div>
+				</form>
+				<form ng-hide="stats">
+				<BR>
+				<div class="w3-row-padding">
+						<div class="w3-col" style="width:100px">
+							<a class="w3-white w3-middle" ><b>REFR(S): </b></a> 
+						</div>
+						<div class="w3-rest">
+							<select class="w3-select w3-border" ng-model="SelRefresh" ng-options="x for x in refresh_list">
+						</select>
+						</div>
+				</div>
+						<div class="w3-white">
+						<label><b>CPU:</b></label> 
+						<div class="w3-container {{color_cpu_perc}} w3-center" style="width:{{status.cpu_perc}}%">{{status.cpu_perc}}%
+						</div>
+						</div>
+						<div class="w3-white ">
+						<label><b>RAM:</b></label> 
+						<div class="w3-container {{color_mem_perc}} w3-center" style="width:{{status.mem_perc}}%">{{status.mem_perc}}%
+						</div>
+						</div>
+						<BR>
+						<div class="w3-bar w3-left-align">
+							<label><b> {{lang.status_conf_status}}: </b> 
+							<i class="fas fa-circle w3-text-green" style="font-size:20px" ng-hide=circle></i>
+							<i class="fas fa-circle w3-text-red" style="font-size:20px" ng-hide=not_conn></i>
+							<i class="fas fa-play-circle w3-text-green" style="font-size:20px" ng-hide=play_circle></i>
+							<i class="fa fa-spinner w3-spin w3-text-red" style="font-size:20px" ng-hide=spinner></i>
+							<i class="fas fa-play-circle w3-text-red" style="font-size:20px" ng-hide=replay_circle></i>
+							{{status_playstate}} {{status.playedtitle}} </label></p>
+						</div>
+				</form>
+						
+						<button ng-click="send_key('NOP')" class="w3-button	w3-round w3-text-blue w3-xxlarge" ng-hide=true><b>NOP</b></button>
+						
+						<footer class="w3-container w3-teal w3-center w3-margin-top">
+							<p>Xnoppo</p>
+							<p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+						</footer> 			
+			</div>
+							</div> 			   
+	</div>        				
+</div>
+
+	   
+	<!-- End Right Column -->	   
+  <!-- End Grid -->
+ </div>  
+</body>
+</html>
