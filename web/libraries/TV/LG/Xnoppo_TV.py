@@ -185,9 +185,12 @@ def tv_change_hdmi(config):
     logging.info (store["client_key"])
     source_control = SourceControl(client)
     sources = source_control.list_sources()
-    app = ApplicationControl(client)
-    currentapp=app.get_current()
-    config["current_LG"]=currentapp
+
+    if config["current_LG"]=='':
+        app = ApplicationControl(client)
+        currentapp=app.get_current()
+        config["current_LG"]=currentapp
+        
     source_control.set_source(sources[config["Source"]])
     index=0
     logging.info ('Listado de las entradas disponibles:')
@@ -196,6 +199,32 @@ def tv_change_hdmi(config):
         logging.info ('Fuente indice: %s - Entrada: %s',str(index),str(source))
         index=index+1
     return("OK")
+
+def set_app_current(config):
+    print(config["TV_KEY"])
+    if config["TV_KEY"]=='':
+        store = {}
+    else :
+        store = {'client_key': config["TV_KEY"] }
+    print(store)
+    client = WebOSClient(config["TV_IP"])
+    try:
+       client.connect()
+    except:
+       print("Error conexion")
+       return("Error conexion")
+    for status in client.register(store):
+        if status == WebOSClient.PROMPTED:
+          print("Por favor acepta la conexion en la TV")
+          logging.info ("Por favor acepta la conexion en la TV")
+        elif status == WebOSClient.REGISTERED:
+          print("Registro correcto!")
+          logging.info ("Registro correcto!")
+
+    app = ApplicationControl(client)
+    currentapp=app.get_current()
+    config["current_LG"]=currentapp
+    return(currentapp)
 
 def tv_set_prev(config):
     print(config["TV_KEY"])

@@ -838,6 +838,14 @@ def playother(EmbySession,data,scripterx=False):
         if EmbySession.config["DebugLevel"]>0: print("Fin Replay")
     
 def playto_file(EmbySession,data,scripterx=False):
+    if EmbySession.config["TV"]==True:
+        logging.info ('Guardamos app TV actual')
+        try:
+            result = set_app_current(EmbySession.config)
+            if EmbySession.config["DebugLevel"]>0: print(result)
+            logging.info ('Resultado: %s',str(result))
+        except:
+            pass
     EmbySession.playstate="Loading"
     EmbySession.currentdata=data
     if EmbySession.config["DebugLevel"]>0: print("scripterx is " + str(scripterx))
