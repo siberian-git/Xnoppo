@@ -422,6 +422,7 @@ def get_devices(config):
                 try:
                     if device["Id"]!='Xnoppo':
                         device["Name"]=device["Name"] + " / " + device["AppName"]
+                        device["Id"]=device["ReportedDeviceId"]
                         dev_temp.append(device)
                 except:
                     pass
