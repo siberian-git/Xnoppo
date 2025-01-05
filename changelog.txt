@@ -85,4 +85,6 @@
  eliminacion del configurador de la seleccion de dispositivo en la configuracion de la tv al no ser ya necesario.
  modificados los comandos para AV DENON de encedido y apagado para que solo actue sobre la zona main.
  ahora el cliente recarga el config despues de terminar una reproduccion.
+#BETA versión 2.03
+ modificado el sistema de reproduccion para funcionar las isos con emby 4.8
  

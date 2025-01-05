@@ -31,6 +31,7 @@ class xnoppo_ws(threading.Thread):
     MonitoredState=''
     config_file=''
     ws_lang=None
+    wsock=None
 
     def stop(self):
         print('ws stop')
@@ -132,12 +133,29 @@ class xnoppo_ws(threading.Thread):
             self.EmbySession.currentdata["SubtitleStreamIndex"]=int(args['Index'])
         #elif cmd == 'SetVolume'
         
-    def _check_state(self,data):
+    def _check_state(self,data, sessions):
         if self.ws_config["MonitoredDevice"]:
-            item_data = self.EmbySession.get_session_user_info(data["UserId"],self.ws_config["MonitoredDevice"])
-##            if item_data:
+            if sessions:
+                print ("=================================================================================")
+                for item in data:
+                  if item["DeviceId"]==self.ws_config["MonitoredDevice"]:
+                  #if item["DeviceId"]=="e38485e9-a4c8-4cf5-9acd-3c4ece0fe532":
+                      item_data = item
+                      try:
+                         item_data_list=self.EmbySession.get_item_info(item_data["UserId"],item_data["NowPlayingItem"]["Id"])
+                         print ("=========== ITEM DATA LIST ===============")
+                         print (item_data_list)
+                         print ("=========== ITEM DATA LIST END ===============")
+                         break
+                      except:
+                         break
+            else:    
+                item_data = self.EmbySession.get_session_user_info(data["UserId"],self.ws_config["MonitoredDevice"])
+            #if item_data:
+            print(sessions)
+            print(data)
             try:
-                if item_data["NowPlayingItem"]:
+              if item_data["NowPlayingItem"]:
                     #print(item_data)
                     if self.MonitoredState == '':
                         #print('Started Playing')
@@ -173,8 +191,11 @@ class xnoppo_ws(threading.Thread):
                         if encontrado:
                             if self.ws_config["DebugLevel"]>0: print("LIBRARY NAME: " + LibraryName)
                             logging.debug('El item %s es de la libreria %s',item_name,LibraryName)
-                            userdatalist=data["UserDataList"]
-                            userdata=userdatalist[0]
+                            if sessions:
+                               userdata=item_data_list["UserData"]
+                            else:
+                               userdatalist=data["UserDataList"]
+                               userdata=userdatalist[0]
                             try:
                                 playstate = item_data["PlayState"]
                             except:
@@ -186,7 +207,7 @@ class xnoppo_ws(threading.Thread):
                                     "MediaSourceId": playstate.get("MediaSourceId",""),
                                     "AudioStreamIndex": playstate.get("AudioStreamIndex",1),
                                     "SubtitleStreamIndex": playstate.get("SubtitleStreamIndex",-1),
-                                    "ControllingUserId":data["UserId"],
+                                    "ControllingUserId":item_data["UserId"],
                                     "SessionID": item_data["Id"],
                                     "DeviceName": item_data["DeviceName"],
                                     "Device_Id": self.ws_config["MonitoredDevice"]
@@ -219,7 +240,7 @@ class xnoppo_ws(threading.Thread):
                         if self.ws_config["DebugLevel"]>0: print(item_data["NowPlayingItem"]["Name"])
 ##            else:
             except:
-                if self.MonitoredState!='':
+               if self.MonitoredState!='':
                     if self.ws_config["DebugLevel"]>0: print('Stopped Playing')
                     if self.ws_config["DebugLevel"]>0: print(item_data["DeviceName"])
                     if self.ws_config["DebugLevel"]>0: print(self.MonitoredState)
@@ -254,7 +275,8 @@ class xnoppo_ws(threading.Thread):
         ws.emby_state="Message Arrived:" + msg
         msg_json = json.loads(msg)
         msg_type = msg_json['MessageType']
-
+        logging.debug("Json Message: %s", msg_json)
+        
         if msg_type == 'Play':
             data = msg_json['Data']
             ws._play(data)
@@ -265,7 +287,7 @@ class xnoppo_ws(threading.Thread):
 
         elif msg_type == "UserDataChanged":
             data = msg_json['Data']
-            ws._check_state(data)
+            #ws._check_state(data,False)
 
         elif msg_type == "LibraryChanged":
             data = msg_json['Data']
@@ -274,9 +296,12 @@ class xnoppo_ws(threading.Thread):
         elif msg_type == "GeneralCommand":
             data = msg_json['Data']
             ws._general_commands(data)
-
+        elif msg_type == "Sessions":
+            data = msg_json['Data']
+            ws._check_state(data,True)
         else:
             logging.debug("WebSocket Message Type: %s", msg_type)
+            
     def on_error(ws, error):
         if ws.ws_config["DebugLevel"]>0: print (error)
         ws.emby_state='Ws::Error'
@@ -288,7 +313,8 @@ class xnoppo_ws(threading.Thread):
     def on_open(ws):
        if ws.ws_config["DebugLevel"]>0: print('Ws:Open')
        ws.emby_state='Opened'
-       ws.send("Hello!")
+       b = ws.wsock.send('{"MessageType":"SessionsStart", "Data": "0,1500"}')
+       print(b)
 
     def run(self):
         self.EmbySession=EmbyHttp(self.ws_config)
@@ -297,15 +323,22 @@ class xnoppo_ws(threading.Thread):
         self.EmbySession.set_capabilities()
         uri = self.ws_config["emby_server"].replace('http://', 'ws://').replace('https://', 'wss://')
         uri = uri + '/?api_key=' + self.ws_user_info["AccessToken"] + '&deviceId=''Xnoppo'''
+        #uri = uri + '/?api_key=' + self.ws_user_info["AccessToken"] + '&deviceId={}'
         if self.ws_config["DebugLevel"]>0: print(uri)
-        self.ws = WebSocketApp(uri,
+        self.wsock = WebSocketApp(uri,
+                                    on_open=self.on_open,
                                     on_message=self.on_message,
                                     on_error=self.on_error,
                                     on_close=self.on_close)
         if self.ws_config["DebugLevel"]>0: print('Ws:Fin open ws\n')
         self.emby_state='Run'
+        a=1
         while not self.stop_websocket:
-            self.ws.run_forever(ping_interval=10)
+            self.wsock.run_forever(ping_interval=10)
+            if a==1:
+                self.wsock.send('{"MessageType":"SessionsStart", "Data": "0,1500"}')
+                a=2
+                print('Ws:Envio mensaje\n')
             if self.ws_config["DebugLevel"]>0: print("after run forever")
             if self.stop_websocket:
                 break

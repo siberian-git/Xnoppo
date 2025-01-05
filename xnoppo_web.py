@@ -19,7 +19,7 @@ import logging.handlers
 import psutil
 
 def get_version():
-    return("2.01")
+    return("2.03")
 
 def thread_function(ws_object):
     print("Thread: starting")
@@ -420,7 +420,7 @@ def get_devices(config):
         dev_temp = []
         for device in devices["Items"]:
                 try:
-                    if device["Id"]!='Xnoppo':
+                    if device["ReportedDeviceId"]!='Xnoppo':
                         device["Name"]=device["Name"] + " / " + device["AppName"]
                         device["Id"]=device["ReportedDeviceId"]
                         dev_temp.append(device)
@@ -997,6 +997,31 @@ class MyServer(BaseHTTPRequestHandler):
                     self.send_header('Access-Control-Allow-Origin', '*')
                     self.end_headers()
                     self.wfile.write(bytes(json.dumps(config),"utf-8"))
+                else:
+                    self.send_response(300)
+                    self.send_header("Content-Length", len("ERROR"))
+                    self.send_header("Content-Type", "text/html")
+                    self.send_header('Access-Control-Allow-Credentials', 'true')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(bytes("ERROR","utf-8"))
+                return(0)
+        if self.path == '/start_movie':
+                content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
+                post_data = self.rfile.read(content_length) # <--- Gets the data itself
+                print(post_data)
+                data=json.loads(post_data.decode('utf-8'))
+                print(data)
+                emby_wsocket._play(data)
+                a = 'OK'
+                if a == 'OK':
+                    self.send_response(200)
+                    self.send_header("Content-Length", len("Ok"))
+                    self.send_header("Content-Type", "text/html")
+                    self.send_header('Access-Control-Allow-Credentials', 'true')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(bytes("OK","utf-8"))
                 else:
                     self.send_response(300)
                     self.send_header("Content-Length", len("ERROR"))
